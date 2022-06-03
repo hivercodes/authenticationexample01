@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash, sen
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+import os
 
 app = Flask(__name__)
 
@@ -51,9 +52,10 @@ def logout():
     pass
 
 
-@app.route('/download')
-def download():
-    pass
+@app.route('/download/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    uploads = os.path.join(app.root_path, "static/files")
+    return send_from_directory(directory=uploads, path=filename, as_attachment=True)
 
 #runs the app
 if __name__ == "__main__":
