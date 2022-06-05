@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
+import werkzeug
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import os
@@ -29,8 +30,8 @@ def home():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        print(request.form["email"])
-        new_user = User(email=request.form["email"], password=request.form["password"], name=request.form["name"])
+        hashed_password = werkzeug.security.generate_password_hash(request.form["password"], method='pbkdf2:sha256', salt_length=8)
+        new_user = User(email=request.form["email"], password=hashed_password, name=request.form["name"])
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for("home"))
