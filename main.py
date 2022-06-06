@@ -30,9 +30,13 @@ def home():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        #uses werkzeug to encrupt and has the password
         hashed_password = werkzeug.security.generate_password_hash(request.form["password"], method='pbkdf2:sha256', salt_length=8)
+        #creates a new user object
         new_user = User(email=request.form["email"], password=hashed_password, name=request.form["name"])
+        #adds new user to database
         db.session.add(new_user)
+        #commits database
         db.session.commit()
         return redirect(url_for("home"))
     return render_template("register.html")
