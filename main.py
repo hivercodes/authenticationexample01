@@ -22,6 +22,14 @@ class User(UserMixin, db.Model):
 # db.create_all()
 
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -42,12 +50,21 @@ def register():
     return render_template("register.html")
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        #searches for user in database
+        user = User.query.filter_by(email=email).first()
+        if check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for("secrets"))
     return render_template("login.html")
 
 
 @app.route('/secrets')
+@login_required
 def secrets():
     return render_template("secrets.html")
 
@@ -58,6 +75,7 @@ def logout():
 
 
 @app.route('/download/<path:filename>', methods=['GET', 'POST'])
+@login_required
 def download(filename):
     uploads = os.path.join(app.root_path, "static/files")
     return send_from_directory(directory=uploads, path=filename, as_attachment=True)
