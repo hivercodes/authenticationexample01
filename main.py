@@ -55,6 +55,7 @@ def login():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
+        error = None
         #searches for user in database
         user = User.query.filter_by(email=email).first()
         if check_password_hash(user.password, password):
@@ -70,8 +71,10 @@ def secrets():
 
 
 @app.route('/logout')
+@login_required
 def logout():
-    pass
+    logout_user()
+    return redirect(url_for("home"))
 
 
 @app.route('/download/<path:filename>', methods=['GET', 'POST'])
